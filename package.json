@@ -1,0 +1,33 @@
+{
+  "name": "react-scrollee",
+  "version": "0.0.1",
+  "description": "Lightweight React component for adding scroll animation to your project",
+  "main": "build/index.js",
+  "peerDependencies": {
+    "react": "^15.5.4"
+  },
+  "dependencies": {
+    "path": "^0.12.7",
+    "react": "^15.5.4",
+    "webpack": "^4.43.0",
+    "prop-types": "^15.7.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack --watch",
+    "build": "webpack"
+  },
+  "author": {
+    "name": "William James",
+    "email": "me@williamhjames.com"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-core": "^6.24.1",
+    "babel-loader": "^7.0.0",
+    "babel-plugin-transform-object-rest-spread": "^6.23.0",
+    "babel-plugin-transform-react-jsx": "^6.24.1",
+    "babel-preset-env": "^1.5.1",
+    "webpack-cli": "^3.3.11"
+  }
+}
