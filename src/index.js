@@ -11,7 +11,8 @@ class ScrollY extends Component {
       isAnimated: [],
     };
     this.handleScroll = this.handleScroll.bind(this);
-    this.deployAnimation = this.deployAnimation.bind(this);
+    this.setAnimState = this.setAnimState.bind(this);
+    this.initAnimation = this.initAnimation.bind(this);
   }
 
   componentDidMount() {
@@ -35,7 +36,7 @@ class ScrollY extends Component {
     window.removeEventListener("scroll", this.handleScroll, true);
   }
 
-  deployAnimation(element, value) {
+  setAnimState(element, value) {
     const { isAnimated } = this.state;
     let finishedAnimations = Object.assign([], isAnimated, {
       [element]: value,
@@ -70,17 +71,71 @@ class ScrollY extends Component {
         currentPosition <= elementTop + elementHeight &&
         !isAnimated[vari]
       ) {
-        scrollYCallback([vari]);
-        this.deployAnimation(vari, true);
-      } else if (
-        currentPosition < elementTop + elementHeight &&
+        this.initAnimation([vari]);
+        let x = ((currentPosition - elementTop) / elementHeight) * 100;
+        console.log("percentage: " + x);
+      }
+
+      else if (
+        currentPosition > elementTop + elementHeight &&
         isAnimated[vari] &&
-        replayable
+        scrollboth
       ) {
-        this.deployAnimation(vari, false);
+        this.setAnimState(vari, false);
       }
     }
   }
+
+
+
+ class initAnimation extends Component {
+    constructor(props) {
+      super(props)
+      this.state = {
+        prevProgress: null;
+        playState: null
+      }
+    }
+componentDidMount() {
+  scrollYCallback(vari);
+  this.startAnim()
+
+}
+/// anim progress can go either way
+startAnim() {
+let animProgress = ((currentPosition - elementTop) / elementHeight) * 100;
+
+while (animProgress > 0 && animProgress < 99) {
+if (animProgress > prevProgress && forward) {
+
+  this.setState({
+    prevProgress: animProgress,
+    playState: playing
+  })
+
+} else if (animProgress < prevProgress && backward) {
+
+  this.setState({
+    prevProgress: animProgress,
+    playState: playing
+  })
+
+} else {
+
+    this.setState({
+    prevProgress: animProgress,
+    playState: finished
+  })
+   this.setAnimState(vari, true);
+  }
+}
+}
+
+}
+
+
+
+
 
   render() {
     const { triggerPos, showPointer } = this.props;
