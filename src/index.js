@@ -16,16 +16,24 @@ class Scro extends Component {
 
   componentDidMount() {
     const { triggerElements } = this.props;
-    let isAnimationPlayingArr = [];
+    const triggerElementsType = Array.isArray(triggerElements)
+      ? triggerElements
+      : [triggerElements];
+    let initAnimPlaystate = [];
     const selector = (element) => document.querySelector(element);
-    let getTriggerElements = triggerElements.map((element) => {
-      isAnimationPlayingArr.push(false);
-      return selector(element);
+
+    let getTriggerElements = triggerElementsType.map((element) => {
+      initAnimPlaystate.push(false);
+      if (typeof element === "string") {
+        return selector(element);
+      } else {
+        return element.current;
+      }
     });
 
     this.setState({
       allElements: getTriggerElements,
-      isAnimationPlaying: isAnimationPlayingArr,
+      isAnimationPlaying: initAnimPlaystate,
     });
 
     window.addEventListener("scroll", this.handleScroll, true);
@@ -39,7 +47,7 @@ class Scro extends Component {
     const { allElements, isAnimationPlaying } = this.state;
     const { isReplayable } = this.props;
     let elementTop = allElements[elem].getBoundingClientRect().top;
-    const elementHeight = allElements[elem].offsetHeight;
+    let elementHeight = allElements[elem].offsetHeight;
     let progress = ((currentScrollPosition - elementTop) / elementHeight) * 100;
 
     if (progress >= 0 && progress <= 100) {
@@ -73,8 +81,8 @@ class Scro extends Component {
           allElements: allElementsImu,
         });
       }
-      console.log(allElements);
     }
+    console.log(allElements);
   }
 
   handleScroll() {
@@ -123,7 +131,7 @@ Scro.defaultProps = {
   scrollContainer: "body",
   triggerPlacement: "50%",
   isIndicator: true,
-  isReplayable: false,
+  isReplayable: true,
 };
 
 Scro.propTypes = {
