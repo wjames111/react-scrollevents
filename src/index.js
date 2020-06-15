@@ -10,13 +10,16 @@ class Scro extends Component {
     this.state = {
       allElements: [],
       isAnimationPlaying: [],
-      debounceAmount: 15,
+      triggerPosition: "",
+      setScrollContainer: "",
     };
+
     this.handleScroll = this.handleScroll.bind(this);
     this.initAnimation = this.initAnimation.bind(this);
+
     this.throttledScroll = debounce(
       this.handleScroll,
-      this.state.debounceAmount,
+      this.props.debounceAmount,
       {
         trailing: true,
         leading: true,
@@ -26,26 +29,30 @@ class Scro extends Component {
 
   componentDidMount() {
     const { triggerElements, scrollContainer, triggerPlacement } = this.props;
-    const triggerElementsType = Array.isArray(triggerElements)
-      ? triggerElements
-      : [triggerElements];
-    let initAnimPlaystate = [];
+
     let getTriggerPosition =
       (parseInt(triggerPlacement) / 100) * window.innerHeight;
+
     const selector = (element) => document.querySelector(element);
 
-    let getScrollContainer =
-      typeof scrollContainer === "string"
-        ? selector(scrollContainer)
-        : scrollContainer.current;
-
-    let getTriggerElements = triggerElementsType.map((element) => {
-      initAnimPlaystate.push(false);
+    let typeOfSelector = (element) => {
       if (typeof element === "string") {
         return selector(element);
       } else {
         return element.current;
       }
+    };
+
+    const triggerElementsType = Array.isArray(triggerElements)
+      ? triggerElements
+      : [triggerElements];
+
+    let getScrollContainer = typeOfSelector(scrollContainer);
+
+    let initAnimPlaystate = [];
+    let getTriggerElements = triggerElementsType.map((element) => {
+      initAnimPlaystate.push(false);
+      return typeOfSelector(element);
     });
 
     this.setState({
@@ -69,34 +76,45 @@ class Scro extends Component {
     let elementTop = element.getBoundingClientRect().top;
     let progress = ((currentScrollPosition - elementTop) / elementHeight) * 100;
 
+    let setAnimationPlayingArr = (value) => {
+      let isAnimPlayingArr = Object.assign([], isAnimationPlaying, {
+        [elemIdx]: value,
+      });
+      this.setState({
+        isAnimationPlaying: isAnimPlayingArr,
+      });
+    };
+
+    let setCallBack = (scrollState) => {
+      const clb = onScrollYCallback;
+      let clbck;
+      switch (scrollState) {
+        case "start":
+          clbck = clb.start;
+          break;
+        case "progress":
+          clbck = clb.progress;
+          break;
+        case "end":
+          clbck = clb.end;
+          break;
+      }
+      clbck && clbck(element, progress);
+    };
+
     if (progress >= 0 && progress <= 100) {
       if (!isAnimationPlaying[elemIdx]) {
-        onScrollYCallback.start &&
-          onScrollYCallback.start(allElements[elemIdx], progress);
-
-        let isAnimationPlayingArr = Object.assign([], isAnimationPlaying, {
-          [elemIdx]: true,
-        });
-
-        this.setState({
-          isAnimationPlaying: isAnimationPlayingArr,
-        });
+        setCallBack("start");
+        setAnimationPlayingArr(true);
       }
-      onScrollYCallback.progress &&
-        onScrollYCallback.progress(allElements[elemIdx], progress);
+      setCallBack("progress");
     } else if (isAnimationPlaying[elemIdx]) {
-      onScrollYCallback.end && onScrollYCallback.end(allElements[elemIdx]);
-      let isAnimationPlayingArr = Object.assign([], isAnimationPlaying, {
-        [elemIdx]: false,
-      });
-
-      this.setState({
-        isAnimationPlaying: isAnimationPlayingArr,
-      });
+      setCallBack("end");
+      setAnimationPlayingArr(false);
 
       if (!isReplayable) {
         let allElementsImu = [...allElements];
-        let rmElement = allElementsImu.splice(elemIdx, 1);
+        allElementsImu.splice(elemIdx, 1);
         this.setState({
           allElements: allElementsImu,
         });
@@ -105,12 +123,7 @@ class Scro extends Component {
   }
 
   handleScroll() {
-    let {
-      allElements,
-      isAnimationDone,
-      triggerPosition,
-      setScrollContainer,
-    } = this.state;
+    const { allElements, triggerPosition, setScrollContainer } = this.state;
 
     if (!allElements.length) {
       window.removeEventListener("scroll", this.throttledScroll);
@@ -159,7 +172,7 @@ Scro.defaultProps = {
   triggerPlacement: "50vh",
   isIndicator: true,
   isReplayable: false,
-  debounce: 15,
+  debounceAmount: 15,
 };
 
 Scro.propTypes = {
@@ -168,7 +181,7 @@ Scro.propTypes = {
   triggerPlacement: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   isIndicator: PropTypes.bool,
   isReplayable: PropTypes.bool,
-  debounce: PropTypes.number,
+  debounceAmount: PropTypes.number,
   triggerElements: PropTypes.oneOfType([PropTypes.string, PropTypes.array])
     .isRequired,
   onScrollYCallback: PropTypes.object.isRequired,
