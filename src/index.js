@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
+import debounce from "lodash/debounce";
 
 class Scro extends Component {
   constructor(props) {
@@ -9,18 +10,34 @@ class Scro extends Component {
     this.state = {
       allElements: [],
       isAnimationPlaying: [],
+      debounceAmount: 15,
     };
     this.handleScroll = this.handleScroll.bind(this);
     this.initAnimation = this.initAnimation.bind(this);
+    this.throttledScroll = debounce(
+      this.handleScroll,
+      this.state.debounceAmount,
+      {
+        trailing: true,
+        leading: true,
+      }
+    );
   }
 
   componentDidMount() {
-    const { triggerElements } = this.props;
+    const { triggerElements, scrollContainer, triggerPlacement } = this.props;
     const triggerElementsType = Array.isArray(triggerElements)
       ? triggerElements
       : [triggerElements];
     let initAnimPlaystate = [];
+    let getTriggerPosition =
+      (parseInt(triggerPlacement) / 100) * window.innerHeight;
     const selector = (element) => document.querySelector(element);
+
+    let getScrollContainer =
+      typeof scrollContainer === "string"
+        ? selector(scrollContainer)
+        : scrollContainer.current;
 
     let getTriggerElements = triggerElementsType.map((element) => {
       initAnimPlaystate.push(false);
@@ -34,40 +51,43 @@ class Scro extends Component {
     this.setState({
       allElements: getTriggerElements,
       isAnimationPlaying: initAnimPlaystate,
+      triggerPosition: getTriggerPosition,
+      setScrollContainer: getScrollContainer,
     });
 
-    window.addEventListener("scroll", this.handleScroll, true);
+    window.addEventListener("scroll", this.throttledScroll);
   }
 
   componentWillUnmount() {
-    window.removeEventListener("scroll", this.handleScroll, true);
+    window.removeEventListener("scroll", this.throttledScroll);
   }
 
-  initAnimation(elem, currentScrollPosition) {
+  initAnimation(element, elemIdx, currentScrollPosition) {
     const { allElements, isAnimationPlaying } = this.state;
-    const { isReplayable } = this.props;
-    let elementTop = allElements[elem].getBoundingClientRect().top;
-    let elementHeight = allElements[elem].offsetHeight;
+    const { isReplayable, onScrollYCallback } = this.props;
+    let elementHeight = element.offsetHeight;
+    let elementTop = element.getBoundingClientRect().top;
     let progress = ((currentScrollPosition - elementTop) / elementHeight) * 100;
 
     if (progress >= 0 && progress <= 100) {
-      if (!isAnimationPlaying[elem]) {
-        alert("start");
-        // onScrollYCallback.start(element)
+      if (!isAnimationPlaying[elemIdx]) {
+        onScrollYCallback.start &&
+          onScrollYCallback.start(allElements[elemIdx], progress);
+
         let isAnimationPlayingArr = Object.assign([], isAnimationPlaying, {
-          [elem]: true,
+          [elemIdx]: true,
         });
 
         this.setState({
           isAnimationPlaying: isAnimationPlayingArr,
         });
       }
-      // this.props.onScrollYCallback.animation(element, progress)
-    } else if (isAnimationPlaying[elem]) {
-      alert("end");
-      // onScrollYCallback.end(element)
+      onScrollYCallback.progress &&
+        onScrollYCallback.progress(allElements[elemIdx], progress);
+    } else if (isAnimationPlaying[elemIdx]) {
+      onScrollYCallback.end && onScrollYCallback.end(allElements[elemIdx]);
       let isAnimationPlayingArr = Object.assign([], isAnimationPlaying, {
-        [elem]: false,
+        [elemIdx]: false,
       });
 
       this.setState({
@@ -76,27 +96,35 @@ class Scro extends Component {
 
       if (!isReplayable) {
         let allElementsImu = [...allElements];
-        let rmElement = allElementsImu.splice(elem, 1);
+        let rmElement = allElementsImu.splice(elemIdx, 1);
         this.setState({
           allElements: allElementsImu,
         });
       }
     }
-    console.log(allElements);
   }
 
   handleScroll() {
-    const { triggerPlacement, scrollContainer } = this.props;
-    let { allElements, isAnimationDone } = this.state;
+    let {
+      allElements,
+      isAnimationDone,
+      triggerPosition,
+      setScrollContainer,
+    } = this.state;
 
-    let triggerPosition = parseInt(triggerPlacement) / 100;
-    let amountScrolled = document.querySelector(scrollContainer).scrollTop;
-    let currentScrollPosition =
-      window.innerHeight * triggerPosition + amountScrolled;
+    if (!allElements.length) {
+      window.removeEventListener("scroll", this.throttledScroll);
+    }
+
+    let currentScrollPosition = triggerPosition + setScrollContainer.scrollTop;
 
     for (let element in allElements) {
-      if (this.state.allElements[element]) {
-        this.initAnimation([element], currentScrollPosition);
+      if (allElements[element]) {
+        this.initAnimation(
+          allElements[element],
+          [element],
+          currentScrollPosition
+        );
       }
     }
   }
@@ -119,7 +147,6 @@ class Scro extends Component {
 
     return (
       <div
-        // ref={this.indicator}
         className="indicator"
         style={isIndicator ? this.styles.trigger : {}}
       ></div>
@@ -129,18 +156,22 @@ class Scro extends Component {
 
 Scro.defaultProps = {
   scrollContainer: "body",
-  triggerPlacement: "50%",
+  triggerPlacement: "50vh",
   isIndicator: true,
-  isReplayable: true,
+  isReplayable: false,
+  debounce: 15,
 };
 
 Scro.propTypes = {
-  scrollContainer: PropTypes.string,
-  triggerPlacement: PropTypes.string,
+  scrollContainer: PropTypes.oneOfType([PropTypes.string, PropTypes.object])
+    .isRequired,
+  triggerPlacement: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   isIndicator: PropTypes.bool,
   isReplayable: PropTypes.bool,
-  triggerElements: PropTypes.array.isRequired,
-  onScrollYCallback: PropTypes.func.isRequired,
+  debounce: PropTypes.number,
+  triggerElements: PropTypes.oneOfType([PropTypes.string, PropTypes.array])
+    .isRequired,
+  onScrollYCallback: PropTypes.object.isRequired,
 };
 
 export default Scro;
