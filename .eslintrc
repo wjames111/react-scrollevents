@@ -1,0 +1,78 @@
+{
+
+  "rules": {
+    "react/jsx-filename-extension": [
+      1,
+      {
+        "extensions": [".js", ".jsx"]
+      }
+    ],
+
+    "react/prefer-stateless-function": "off",
+    "react/jsx-one-expression-per-line": "off",
+        "padding-line-between-statements": [
+        "error",
+        {
+            "blankLine": "always",
+            "prev": "*",
+            "next": [
+                "block",
+                "block-like",
+                "cjs-export",
+                "class",
+                "export",
+                "import",
+                "function",
+                "multiline-var",
+                "multiline-let",
+                "multiline-const",
+                "multiline-expression",
+                "if",
+                "switch",
+                "for"
+
+            ]
+        },
+        {
+            "blankLine": "always",
+            "prev": [
+                  "block",
+                "block-like",
+                "cjs-export",
+                "class",
+                "export",
+                "import",
+                "function",
+                "multiline-var",
+                "multiline-let",
+                "multiline-const",
+                "multiline-expression",
+                "if",
+                "switch",
+                "for"
+
+            ],
+            "next": "*"
+        },
+
+        { "blankLine": "any", "prev": ["export", "import"], "next": ["export", "import"] }
+    ],
+
+  },
+  "env": {
+    "browser": true,
+    "commonjs": true,
+    "es6": true,
+    "node": true
+  },
+
+   "parserOptions": {
+    "ecmaVersion": 6,
+    "ecmaFeatures": {
+      "jsx": true,
+
+    }
+  }
+}
+
+

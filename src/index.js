@@ -1,190 +1,214 @@
-import React, { Component } from "react";
-import ReactDOM from "react-dom";
-import PropTypes from "prop-types";
-import debounce from "lodash/debounce";
+import React, { Component } from 'react';
+// import ReactDOM from "react-dom";
+import PropTypes from 'prop-types';
+import debounce from 'lodash.debounce';
 
 class Scro extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      allElements: [],
-      isAnimationPlaying: [],
-      triggerPosition: "",
-      setScrollContainer: "",
+      allTriggerElements: [],
+      triggersPlaystate: [],
+      indicatorPosition: '50%',
+      scrollingContainer: 'body',
     };
 
     this.handleScroll = this.handleScroll.bind(this);
-    this.initAnimation = this.initAnimation.bind(this);
+    this.checkTriggers = this.checkTriggers.bind(this);
 
-    this.throttledScroll = debounce(
-      this.handleScroll,
-      this.props.debounceAmount,
-      {
+    //  adds reference for removing listener, applies debounce from props
+    this.debounceScroll = props.isDebounce
+      ? debounce(this.handleScroll, props.debounceAmount, {
         trailing: true,
         leading: true,
-      }
-    );
+      })
+      : this.handleScroll;
   }
 
   componentDidMount() {
-    const { triggerElements, scrollContainer, triggerPlacement } = this.props;
+    const { triggerElements, scrollContainer, indicatorPlacement } = this.props;
 
-    let getTriggerPosition =
-      (parseInt(triggerPlacement) / 100) * window.innerHeight;
+    //  finds location of indicator relative to viewport
+    const calcIndicatorPosition = (parseInt(indicatorPlacement, 10) / 100) * window.innerHeight;
+    const getSelector = (element) => document.querySelector(element);
 
-    const selector = (element) => document.querySelector(element);
-
-    let typeOfSelector = (element) => {
-      if (typeof element === "string") {
-        return selector(element);
-      } else {
-        return element.current;
+    //  allows props to be a selector or ref
+    const checkTypeOfSelector = (element) => {
+      if (typeof element === 'string') {
+        return getSelector(element);
       }
+
+      return element.current;
     };
 
-    const triggerElementsType = Array.isArray(triggerElements)
-      ? triggerElements
-      : [triggerElements];
+    //  map a single trigger or multiple triggers with same function
+    const makeElementsArray = Array.isArray(triggerElements) ? triggerElements : [triggerElements];
+    const getScrollContainer = checkTypeOfSelector(scrollContainer);
+    const initTriggerPlaystate = [];
 
-    let getScrollContainer = typeOfSelector(scrollContainer);
-
-    let initAnimPlaystate = [];
-    let getTriggerElements = triggerElementsType.map((element) => {
-      initAnimPlaystate.push(false);
-      return typeOfSelector(element);
+    const getTriggerElements = makeElementsArray.map((element) => {
+      //  keeps reference for triggered elements
+      initTriggerPlaystate.push(false);
+      return checkTypeOfSelector(element);
     });
 
     this.setState({
-      allElements: getTriggerElements,
-      isAnimationPlaying: initAnimPlaystate,
-      triggerPosition: getTriggerPosition,
-      setScrollContainer: getScrollContainer,
+      allTriggerElements: getTriggerElements,
+      triggersPlaystate: initTriggerPlaystate,
+      indicatorPosition: calcIndicatorPosition,
+      scrollingContainer: getScrollContainer,
     });
 
-    window.addEventListener("scroll", this.throttledScroll);
+    window.addEventListener('scroll', this.debounceScroll);
   }
 
   componentWillUnmount() {
-    window.removeEventListener("scroll", this.throttledScroll);
+    window.removeEventListener('scroll', this.debounceScroll);
   }
 
-  initAnimation(element, elemIdx, currentScrollPosition) {
-    const { allElements, isAnimationPlaying } = this.state;
+  checkTriggers(elemIdx, scrollPosition) {
+    const { allTriggerElements, triggersPlaystate } = this.state;
     const { isReplayable, onScrollYCallback } = this.props;
-    let elementHeight = element.offsetHeight;
-    let elementTop = element.getBoundingClientRect().top;
-    let progress = ((currentScrollPosition - elementTop) / elementHeight) * 100;
+    const element = allTriggerElements[elemIdx];
+    const elementHeight = element.offsetHeight;
+    const elementTop = element.getBoundingClientRect().top;
 
-    let setAnimationPlayingArr = (value) => {
-      let isAnimPlayingArr = Object.assign([], isAnimationPlaying, {
+    //  get percentage of trigger element scrolled
+    const progress = ((scrollPosition - elementTop) / elementHeight) * 100;
+
+    const updatetriggersPlaystate = (value) => {
+      const newPlaystate = Object.assign([], triggersPlaystate, {
         [elemIdx]: value,
       });
+
       this.setState({
-        isAnimationPlaying: isAnimPlayingArr,
+        triggersPlaystate: newPlaystate,
       });
     };
 
-    let setCallBack = (scrollState) => {
-      const clb = onScrollYCallback;
-      let clbck;
-      switch (scrollState) {
-        case "start":
-          clbck = clb.start;
+    //  notifies parent component of triggered events
+    const sendCallBack = (triggeredAction) => {
+      const calbck = onScrollYCallback;
+      let setCalbck;
+
+      switch (triggeredAction) {
+        case 'start':
+          setCalbck = calbck.start;
           break;
-        case "progress":
-          clbck = clb.progress;
+        case 'progress':
+          setCalbck = calbck.progress;
           break;
-        case "end":
-          clbck = clb.end;
+        case 'end':
+          setCalbck = calbck.end;
+          break;
+        default:
+          setCalbck = null;
           break;
       }
-      clbck && clbck(element, progress);
+
+      //  && avoids error if undefined callback invoked
+      (() => setCalbck && setCalbck(element, progress))();
+    };
+
+    const updateTriggered = (triggeredAction, playState) => {
+      sendCallBack(triggeredAction);
+      updatetriggersPlaystate(playState);
     };
 
     if (progress >= 0 && progress <= 100) {
-      if (!isAnimationPlaying[elemIdx]) {
-        setCallBack("start");
-        setAnimationPlayingArr(true);
+      if (!triggersPlaystate[elemIdx]) {
+        updateTriggered('start', true);
       }
-      setCallBack("progress");
-    } else if (isAnimationPlaying[elemIdx]) {
-      setCallBack("end");
-      setAnimationPlayingArr(false);
+
+      sendCallBack('progress');
+    } else if (triggersPlaystate[elemIdx]) {
+      updateTriggered('end', false);
 
       if (!isReplayable) {
-        let allElementsImu = [...allElements];
-        allElementsImu.splice(elemIdx, 1);
+        //  remove non-replayable element once triggered
+        const rmTriggeredElements = [...allTriggerElements];
+        rmTriggeredElements.splice(elemIdx, 1);
+
         this.setState({
-          allElements: allElementsImu,
+          allTriggerElements: rmTriggeredElements,
         });
       }
     }
   }
 
   handleScroll() {
-    const { allElements, triggerPosition, setScrollContainer } = this.state;
+    const { allTriggerElements, indicatorPosition, scrollingContainer } = this.state;
 
-    if (!allElements.length) {
-      window.removeEventListener("scroll", this.throttledScroll);
+    if (!allTriggerElements.length) {
+      //  once all elements removed (line 131) kill listener
+      window.removeEventListener('scroll', this.debounceScroll);
     }
 
-    let currentScrollPosition = triggerPosition + setScrollContainer.scrollTop;
+    const scrollPosition = indicatorPosition + scrollingContainer.scrollTop;
+    const triggersAmnt = allTriggerElements.length;
 
-    for (let element in allElements) {
-      if (allElements[element]) {
-        this.initAnimation(
-          allElements[element],
-          [element],
-          currentScrollPosition
-        );
-      }
+    for (let elemIdx = 0; elemIdx < triggersAmnt; elemIdx += 1) {
+      this.checkTriggers(elemIdx, scrollPosition);
     }
   }
 
   render() {
-    const { triggerPlacement, isIndicator } = this.props;
+    const {
+      indicatorPlacement, isIndicator, customComponent, triggerStyles,
+    } = this.props;
 
-    this.styles = {
-      trigger: {
-        position: "fixed",
-        height: "3px",
-        width: "10vw",
-        backgroundColor: "green",
-        top: triggerPlacement,
-        right: 0,
-        pointer: 0,
-        zIndex: 800,
-      },
+    const trigger = {
+      position: 'fixed',
+      height: '3px',
+      width: '10vw',
+      backgroundColor: 'green',
+      top: indicatorPlacement,
+      right: 0,
+      zIndex: 100,
+
+      //  custom styles here + will overide
+      ...triggerStyles,
     };
 
     return (
       <div
         className="indicator"
-        style={isIndicator ? this.styles.trigger : {}}
-      ></div>
+
+        // remove styles for nested components
+        style={!customComponent && isIndicator ? trigger : {}}
+      >
+        {customComponent}
+      </div>
     );
   }
 }
 
 Scro.defaultProps = {
-  scrollContainer: "body",
-  triggerPlacement: "50vh",
+  scrollContainer: 'body',
+  indicatorPlacement: '50vh',
   isIndicator: true,
-  isReplayable: false,
+  isReplayable: true,
   debounceAmount: 15,
+  customComponent: null,
+  triggerStyles: {},
+  isDebounce: true,
 };
 
 Scro.propTypes = {
-  scrollContainer: PropTypes.oneOfType([PropTypes.string, PropTypes.object])
-    .isRequired,
-  triggerPlacement: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  scrollContainer: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.shape({ current: PropTypes.instanceOf(Element) }),
+  ]),
+  indicatorPlacement: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   isIndicator: PropTypes.bool,
   isReplayable: PropTypes.bool,
   debounceAmount: PropTypes.number,
-  triggerElements: PropTypes.oneOfType([PropTypes.string, PropTypes.array])
-    .isRequired,
-  onScrollYCallback: PropTypes.object.isRequired,
+  triggerElements: PropTypes.oneOfType([PropTypes.string, PropTypes.array]).isRequired,
+  onScrollYCallback: PropTypes.objectOf(PropTypes.func).isRequired,
+  customComponent: PropTypes.oneOfType(PropTypes.element, PropTypes.oneOf([null])),
+  triggerStyles: PropTypes.objectOf(PropTypes.string),
+  isDebounce: PropTypes.bool,
 };
 
 export default Scro;
