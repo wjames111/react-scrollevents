@@ -33,6 +33,10 @@
     "email": "me@williamhjames.com",
     "url": "williamhjames.com"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wjames111/react-scrollevents"
+  },
   "devDependencies": {
     "babel-cli": "^6.24.1",
     "babel-core": "^6.24.1",
