@@ -1,6 +1,6 @@
 {
-
-  "rules": {
+  "extends": "airbnb",
+   "rules": {
     "react/jsx-filename-extension": [
       1,
       {
@@ -30,13 +30,12 @@
                 "if",
                 "switch",
                 "for"
-
             ]
         },
         {
             "blankLine": "always",
             "prev": [
-                  "block",
+                "block",
                 "block-like",
                 "cjs-export",
                 "class",
@@ -56,23 +55,7 @@
         },
 
         { "blankLine": "any", "prev": ["export", "import"], "next": ["export", "import"] }
-    ],
+    ]
 
   },
-  "env": {
-    "browser": true,
-    "commonjs": true,
-    "es6": true,
-    "node": true
-  },
-
-   "parserOptions": {
-    "ecmaVersion": 6,
-    "ecmaFeatures": {
-      "jsx": true,
-
-    }
-  }
 }
-
-

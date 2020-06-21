@@ -1,10 +1,14 @@
 {
   "name": "react-scrollee",
+  "license": "MIT",
   "version": "0.0.1",
-  "description": "Lightweight React component for adding scroll animation to your project",
+  "description": "Lightweight React component for adding scroll events to your project",
   "main": "build/index.js",
   "peerDependencies": {
-    "react": "^15.5.4"
+    "react": "^15.5.4",
+    "react-dom": "^16.13.1",
+    "prop-types": "^15.7.2",
+    "lodash": "^4.0.8"
   },
   "dependencies": {
     "lodash.debounce": "^4.0.8",
@@ -16,6 +20,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint --fix --ext .js,.jsx .",
     "start": "webpack --watch",
     "build": "webpack"
   },
@@ -30,6 +35,12 @@
     "babel-plugin-transform-object-rest-spread": "^6.23.0",
     "babel-plugin-transform-react-jsx": "^6.24.1",
     "babel-preset-env": "^1.5.1",
+    "eslint": "^7.2.0",
+    "eslint-config-airbnb": "^18.2.0",
+    "eslint-plugin-import": "^2.21.2",
+    "eslint-plugin-jsx-a11y": "^6.3.1",
+    "eslint-plugin-react": "^7.20.0",
+    "eslint-plugin-react-hooks": "^4.0.0",
     "webpack-cli": "^3.3.11"
   }
 }

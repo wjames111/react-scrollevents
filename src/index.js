@@ -107,8 +107,10 @@ class Scro extends Component {
           break;
       }
 
+      (() => (typeof onScrollYCallback === 'function' ? onScrollYCallback(element, triggeredAction, progress)
+
       //  && avoids error if undefined callback invoked
-      (() => setCalbck && setCalbck(element, progress))();
+        : setCalbck && setCalbck(element, progress)))();
     };
 
     const updateTriggered = (triggeredAction, playState) => {
@@ -139,14 +141,14 @@ class Scro extends Component {
 
   handleScroll() {
     const { allTriggerElements, indicatorPosition, scrollingContainer } = this.state;
+    const triggersAmnt = allTriggerElements.length;
 
-    if (!allTriggerElements.length) {
+    if (!triggersAmnt) {
       //  once all elements removed (line 131) kill listener
       window.removeEventListener('scroll', this.debounceScroll);
     }
 
     const scrollPosition = indicatorPosition + scrollingContainer.scrollTop;
-    const triggersAmnt = allTriggerElements.length;
 
     for (let elemIdx = 0; elemIdx < triggersAmnt; elemIdx += 1) {
       this.checkTriggers(elemIdx, scrollPosition);
@@ -205,8 +207,9 @@ Scro.propTypes = {
   isReplayable: PropTypes.bool,
   debounceAmount: PropTypes.number,
   triggerElements: PropTypes.oneOfType([PropTypes.string, PropTypes.array]).isRequired,
-  onScrollYCallback: PropTypes.objectOf(PropTypes.func).isRequired,
-  customComponent: PropTypes.oneOfType(PropTypes.element, PropTypes.oneOf([null])),
+  onScrollYCallback: PropTypes.oneOfType([PropTypes.objectOf(PropTypes.func), PropTypes
+    .func]).isRequired,
+  customComponent: PropTypes.element,
   triggerStyles: PropTypes.objectOf(PropTypes.string),
   isDebounce: PropTypes.bool,
 };
