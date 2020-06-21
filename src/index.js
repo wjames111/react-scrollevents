@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-// import ReactDOM from "react-dom";
+import ReactDOM from "react-dom";
 import PropTypes from 'prop-types';
-import debounce from 'lodash.debounce';
+import debounce from 'lodash/debounce';
 
-class Scro extends Component {
+class ScrollEvents extends Component {
   constructor(props) {
     super(props);
 
@@ -186,7 +186,7 @@ class Scro extends Component {
   }
 }
 
-Scro.defaultProps = {
+ScrollEvents.defaultProps = {
   scrollContainer: 'body',
   indicatorPlacement: '50vh',
   isIndicator: true,
@@ -197,7 +197,7 @@ Scro.defaultProps = {
   isDebounce: true,
 };
 
-Scro.propTypes = {
+ScrollEvents.propTypes = {
   scrollContainer: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.shape({ current: PropTypes.instanceOf(Element) }),
@@ -214,4 +214,4 @@ Scro.propTypes = {
   isDebounce: PropTypes.bool,
 };
 
-export default Scro;
+export default ScrollEvents;
