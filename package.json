@@ -8,16 +8,9 @@
     "react": "^15.5.4",
     "react-dom": "^16.13.1",
     "prop-types": "^15.7.2",
-    "lodash": "^4.0.8"
+    "lodash": "^4.0.8",
   },
-  "dependencies": {
-    "lodash.debounce": "^4.0.8",
-    "path": "^0.12.7",
-    "prop-types": "^15.7.2",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
-    "webpack": "^4.43.0"
-  },
+  "dependencies": {},
    "engines": {
     "node": ">=8",
     "npm": ">=5"
@@ -37,7 +30,11 @@
     "type": "git",
     "url": "https://github.com/wjames111/react-scrollevents"
   },
+  "bundleDependencies": false,
   "devDependencies": {
+    "path": "^0.12.7",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.11",
     "babel-cli": "^6.24.1",
     "babel-core": "^6.24.1",
     "babel-loader": "^7.0.0",
@@ -50,7 +47,6 @@
     "eslint-plugin-jsx-a11y": "^6.3.1",
     "eslint-plugin-react": "^7.20.0",
     "eslint-plugin-react-hooks": "^4.0.0",
-    "webpack-cli": "^3.3.11"
   },
   "keywords": ["scroll", "scrolly", "react-component", "component", "scroll-animation", "infinite-scrolller", "scroll-events", "events", "scrollbar", "react-scrolling", "scrollmagic", "react-animation", "react", "parallax", "scroll-animation"]
 }
