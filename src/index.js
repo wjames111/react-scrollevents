@@ -157,7 +157,7 @@ class ScrollEvents extends Component {
 
   render() {
     const {
-      indicatorPlacement, isIndicator, customComponent, triggerStyles,
+      indicatorPlacement, isIndicator, customComponent, indicatorStyles,
     } = this.props;
 
     const trigger = {
@@ -170,7 +170,7 @@ class ScrollEvents extends Component {
       zIndex: 100,
 
       //  custom styles here + will overide
-      ...triggerStyles,
+      ...indicatorStyles,
     };
 
     return (
@@ -193,7 +193,7 @@ ScrollEvents.defaultProps = {
   isReplayable: true,
   debounceAmount: 15,
   customComponent: null,
-  triggerStyles: {},
+  indicatorStyles: {},
   isDebounce: true,
 };
 
@@ -210,7 +210,7 @@ ScrollEvents.propTypes = {
   onScrollYCallback: PropTypes.oneOfType([PropTypes.objectOf(PropTypes.func), PropTypes
     .func]).isRequired,
   customComponent: PropTypes.element,
-  triggerStyles: PropTypes.objectOf(PropTypes.string),
+  indicatorStyles: PropTypes.objectOf(PropTypes.string),
   isDebounce: PropTypes.bool,
 };
 
