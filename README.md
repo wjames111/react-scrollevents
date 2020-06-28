@@ -7,13 +7,13 @@ The react-scrollevents package is a useful react component for any project requi
 
 # Adding react-scrollevents
 
-1. cd into your project and run
+#### 1. cd into your project and run
 
 ```bash
 npm install --save react-scrollevents
 ```
 
-2. import react-scrollevents component into a class component
+#### 1. import react-scrollevents component into a class component
 
 ```jsx
 import React, { Component } from 'react'
@@ -36,11 +36,20 @@ class App extends Component {
 }
 ```
 
-3. ScrollEvents requires two parameters, a triggerElements prop and a onScrollYCallback prop.
+#### 1. ScrollEvents requires two parameters, a triggerElements prop and a onScrollYCallback prop.
 
 * TriggerElements takes a react ref, if multiple elements will be triggered please pass the refs in an array. TriggerElements will also take a className or id selector as a string, although this is not advised.
 
 * onScrollYCallback requires a function that will be called during each trigger. This callback should accept three arguments, the element triggered, the action (start or end), and the element's scroll progress.
+
+  * onScrollYCallback can be split up into multiple functions based on action. To do this pass in an object with a start, progress and end method.
+ie
+> {
+    start: this.onScrollStart,
+    progress: this.onScrollProgress,
+    end: this.onScrollEnd,
+   }
+
 
 ```jsx
 import React, { Component } from 'react'
@@ -115,12 +124,7 @@ customComponent | react component | yes | null
 * customComponent allows child components to be added inside the scrollEvents component.
 
 
-## Alternatives to Required Props.
+## License
 
-* onScrollYCallback can be split up into multiple functions based on action. To do this pass in an object with a start, progress and end method.
-ie
-> {
-    start: this.onScrollStart,
-    progress: this.onScrollProgress,
-    end: this.onScrollEnd,
-  }
+MIT © [2020](https://github.com/wjames111/react-scrollevents)
+
