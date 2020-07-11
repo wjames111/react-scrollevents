@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
-import ScrollEvents from './react-scrollevents';
+import ScrollEvents from 'react-scrollevents';
 import bell from './bell.svg';
 
 class App extends Component {
@@ -73,12 +73,13 @@ class App extends Component {
     return (
       <div>
         <div ref={this.scrollContainer} className="app">
-          <div className="app-container">
             <div className="app-nav">
               <img alt="notification bell" className="app-nav-bell" src={bell} />
               <span className="app-nav-header">notifications</span>
               <span className="app-nav-list" style={notifyAlert}>{messageAlerts}</span>
             </div>
+          <div className="app-container">
+        
             {
               messageData.map((message) => <div key={message[0]} ref={this[`messageRef${message[0]}`]} style={message[1]} className="messages">{message[2]}</div>)
             }
