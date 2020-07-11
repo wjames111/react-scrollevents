@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import ReactDOM from "react-dom";
 import PropTypes from 'prop-types';
 import debounce from 'lodash/debounce';
 
@@ -39,12 +38,15 @@ class ScrollEvents extends Component {
         return getSelector(element);
       }
 
-      return element.current;
+      return element;
     };
 
     //  map a single trigger or multiple triggers with same function
     const makeElementsArray = Array.isArray(triggerElements) ? triggerElements : [triggerElements];
-    const getScrollContainer = checkTypeOfSelector(scrollContainer);
+
+    const getScrollContainer = scrollContainer.current ? scrollContainer.current
+      : checkTypeOfSelector(scrollContainer);
+
     const initTriggerPlaystate = [];
 
     const getTriggerElements = makeElementsArray.map((element) => {
@@ -60,17 +62,18 @@ class ScrollEvents extends Component {
       scrollingContainer: getScrollContainer,
     });
 
-    window.addEventListener('scroll', this.debounceScroll);
+    getScrollContainer.addEventListener('scroll', this.debounceScroll, true);
   }
 
   componentWillUnmount() {
-    window.removeEventListener('scroll', this.debounceScroll);
+    const { scrollingContainer } = this.state;
+    scrollingContainer.removeEventListener('scroll', this.debounceScroll, true);
   }
 
   checkTriggers(elemIdx, scrollPosition) {
     const { allTriggerElements, triggersPlaystate } = this.state;
     const { isReplayable, onScrollYCallback } = this.props;
-    const element = allTriggerElements[elemIdx];
+    const element = allTriggerElements[elemIdx].current || allTriggerElements[elemIdx];
     const elementHeight = element.offsetHeight;
     const elementTop = element.getBoundingClientRect().top;
 
@@ -107,7 +110,7 @@ class ScrollEvents extends Component {
           break;
       }
 
-      (() => (typeof onScrollYCallback === 'function' ? onScrollYCallback(element, triggeredAction, progress)
+      (() => (typeof onScrollYCallback === 'function' ? onScrollYCallback(elemIdx, triggeredAction, progress)
 
       //  && avoids error if undefined callback invoked
         : setCalbck && setCalbck(element, progress)))();
@@ -118,24 +121,19 @@ class ScrollEvents extends Component {
       updatetriggersPlaystate(playState);
     };
 
-    if (progress >= 0 && progress <= 100) {
-      if (!triggersPlaystate[elemIdx]) {
+    if (progress >= 0 && progress <= 100 && triggersPlaystate[elemIdx] !== null) {
+      if (triggersPlaystate[elemIdx] === false) {
         updateTriggered('start', true);
       }
 
       sendCallBack('progress');
     } else if (triggersPlaystate[elemIdx]) {
-      updateTriggered('end', false);
+      // updateTriggered('end', false);
+      sendCallBack('end');
 
-      if (!isReplayable) {
-        //  remove non-replayable element once triggered
-        const rmTriggeredElements = [...allTriggerElements];
-        rmTriggeredElements.splice(elemIdx, 1);
-
-        this.setState({
-          allTriggerElements: rmTriggeredElements,
-        });
-      }
+      // adds null for elements already animated but not replayable
+      const played = isReplayable ? false : null;
+      updatetriggersPlaystate(played);
     }
   }
 
@@ -145,7 +143,7 @@ class ScrollEvents extends Component {
 
     if (!triggersAmnt) {
       //  once all elements removed (line 131) kill listener
-      window.removeEventListener('scroll', this.debounceScroll);
+      scrollingContainer.removeEventListener('scroll', this.debounceScroll, true);
     }
 
     const scrollPosition = indicatorPosition + scrollingContainer.scrollTop;
@@ -165,7 +163,7 @@ class ScrollEvents extends Component {
       height: '3px',
       width: '10vw',
       backgroundColor: 'green',
-      top: indicatorPlacement,
+      top: `${parseInt(indicatorPlacement, 10)}vh`,
       right: 0,
       zIndex: 100,
 
@@ -194,12 +192,13 @@ ScrollEvents.defaultProps = {
   debounceAmount: 15,
   customComponent: null,
   indicatorStyles: {},
-  isDebounce: true,
+  isDebounce: false,
 };
 
 ScrollEvents.propTypes = {
   scrollContainer: PropTypes.oneOfType([
     PropTypes.string,
+    PropTypes.func,
     PropTypes.shape({ current: PropTypes.instanceOf(Element) }),
   ]),
   indicatorPlacement: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),

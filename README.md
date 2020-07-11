@@ -3,7 +3,20 @@
 > React component for adding scroll events
 
 # About
-The react-scrollevents package is a useful react component for any project requiring scroll interaction in its UI. Whether that be an animation triggered once scrolled to, infinite scroller, or scroll scrubbing, this component should make your job a lot easier. The component returns a handy callback allowing you to write your own scroll interactions without having to set it up yourself. After implementing something similar in several other projects I figured it was time to set up a well-documented reusable component without any extra unneeded functionality. There are several great projects already available for this kind of thing including react-scrollmagic. However, if you're looking for bare bones functionality or are not using the GSAP animation library react-scrollevents is a great option.
+The react-scrollevents package is a useful react component for any project requiring scroll interaction in its UI. Whether that be an animation triggered once scrolled to, infinite scroller, or scroll scrubbing, this component should make your job a lot easier. The component returns a handy callback allowing you to write your own scroll interactions without having to set it up yourself. 
+
+After implementing something similar in several other projects I figured it was time to set up a well-documented reusable component without any extra unneeded functionality. There are several great projects already available for this kind of thing including react-scrollmagic. 
+
+However, if you're looking for bare bones functionality or are not using the GSAP animation library react-scrollevents is a great option.
+If you simply need functionality for an infinite scroller, using IntersectionObserver may be a more performant option. Phong Lam gives a great overview of IntersectionObserver in his medium article [Infinite Scroll’ing the right way](https://medium.com/walmartlabs/infinite-scrolling-the-right-way-11b098a08815).
+
+live demo:
+
+https://github.com/wjames111/react-scrollevents/examples
+
+Examples source:
+
+https://github.com/wjames111/react-scrollevents
 
 # Adding react-scrollevents
 
@@ -36,19 +49,11 @@ class App extends Component {
 }
 ```
 
-#### 1. ScrollEvents requires two parameters, a triggerElements prop and a onScrollYCallback prop.
+#### 1. scrollEvents requires two parameters, a triggerElements prop and a onScrollYCallback prop.
 
-* TriggerElements takes a react ref, if multiple elements will be triggered please pass the refs in an array. TriggerElements will also take a className or id selector as a string, although this is not advised.
+* triggerElements takes in a react ref, if multiple elements will be triggered please pass the refs into an array. While not advised, triggerElements will also take a className or id selector as a string.
 
-* onScrollYCallback requires a function that will be called during each trigger. This callback should accept three arguments, the element triggered, the action (start or end), and the element's scroll progress.
-
-  * onScrollYCallback can be split up into multiple functions based on action. To do this pass in an object with a start, progress and end method.
-ie
-> {
-    start: this.onScrollStart,
-    progress: this.onScrollProgress,
-    end: this.onScrollEnd,
-   }
+* onScrollYCallback requires a callback function that will be called during each trigger. This callback should accept three arguments, the index of the element triggered, the action (start or end), and the element's scroll progress.
 
 
 ```jsx
@@ -93,27 +98,27 @@ class App extends Component {
 
 # Additional Props
 name | type | optional | default
---- | --- | --- | --- | ---
+--- | --- | --- | --- 
 triggerElements | array, react ref or string | no | required
-onScrollYCallback | function or object | no | required
-scrollContainer | string or react ref element | yes | window
+onScrollYCallback | function | no | required
+scrollContainer | react ref element or string | yes | window
 isIndicator | boolean | yes | true
 indicatorPlacement | string or number | yes | 50%
 indicatorStyles | object | yes | {}
 isReplayable | boolean | yes | true
-isDebounce | boolean | yes | true
-debounceAmount | number | yes | 15
+isDebounce | boolean | yes | false
+debounceAmount | number | yes | 15ms
 customComponent | react component | yes | null
 
 
 ## Optional Props Explained
-* scrollContainer is used to attach the event listener to. By default, it's attached to the window object.
+* scrollContainer is the element the event listener is attached to. By default, it's this will be the window object.
 
-* isIndicator adds a pointer for debugging purposes.
+* isIndicator, if set to true adds a pointer for debugging purposes. The default, is set to true.
 
 * indicatorPlacement defines where in the scrollContainer elements should be triggered.
 
-* indicatorStyles allows you to redefine what the pointer looks like. Useful for creating a sticky element.
+* indicatorStyles allows you to redefine what the pointer looks like. Useful for creating a custom sticky component.
 
 * isReplayable allows elements to be triggered more than once.
 
