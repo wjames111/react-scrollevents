@@ -1,0 +1,66 @@
+@import url("https://fonts.googleapis.com/css2?family=PT+Sans&family=Source+Sans+Pro:wght@200&display=swap");
+
+body {
+    font-family: "Source Sans Pro", sans-serif;
+    font-size: 1.5rem;
+    font-weight: lighter;
+    color: #b5b9c1;
+}
+
+.app-container {
+    width: 60vw;
+    height: 70vh;
+    max-width: 700px;
+    min-width: 450px;
+    min-height: 500px;
+    margin: 15vh auto;
+    overflow: scroll;
+    border: 2px solid black;
+    border-radius: 10px;
+    background-color: #283250;
+}
+
+.app-nav {
+    position: fixed;
+    z-index: 100;
+    display: flex;
+    width: 60vw;
+    max-width: 700px;
+    min-width: 450px;
+    padding-top: 1rem;
+    padding-bottom: .5rem;
+    margin-top: -5px;
+    font-size: 2.5rem;
+    text-align: center;
+    border-radius: inherit;
+    background-color: #283250;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.app-nav-bell {
+    height: 2.2rem;
+    margin: auto 3rem;
+}
+
+.app-nav-list {
+    width: 8.2rem;
+    font-weight: bold;
+    transform: scale(1);
+}
+
+.messages {
+    width: 80%;
+    padding: 2rem 2rem 3rem 2rem;
+    margin: 2.5rem auto;
+    box-sizing: border-box;
+    border-radius: 20px;
+    background-color: #374167;
+    -webkit-box-shadow: -11px 10px 24px -12px rgba(0,0,0,.19);
+       -moz-box-shadow: -11px 10px 24px -12px rgba(0,0,0,.19);
+            box-shadow: -11px 10px 24px -12px rgba(0,0,0,.19);
+}
+
+.messages:first-of-type {
+    margin: 25rem auto 5rem auto;
+}
