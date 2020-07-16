@@ -43,12 +43,16 @@ class App extends Component {
       if (action === 'end') {
         if (progress > 90) {
           return 1;
-        } else if (progress < 10) {
-          return -1
-        } else {
-          return 0;
         }
-      } 
+
+        if (messageAlerts) {
+          return -1;
+        }
+
+        return 0;
+      }
+
+      return 0;
     };
 
     const newAlerts = checkAlert();
