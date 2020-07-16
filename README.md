@@ -10,13 +10,13 @@ After implementing something similar in several other projects I figured it was 
 However, if you're looking for bare bones functionality or are not using the GSAP animation library react-scrollevents is a great option.
 If you simply need functionality for an infinite scroller, using IntersectionObserver may be a more performant option. Phong Lam gives a great overview of IntersectionObserver in his medium article [Infinite Scroll’ing the right way](https://medium.com/walmartlabs/infinite-scrolling-the-right-way-11b098a08815).
 
-live demo:
+Live demo:
 
-https://github.com/wjames111/react-scrollevents/examples
+https://wjames111.github.io/react-scrollevents/
 
-Examples source:
+Demo source:
 
-https://github.com/wjames111/react-scrollevents
+https://github.com/wjames111/react-scrollevents/tree/master/examples
 
 # Adding react-scrollevents
 
